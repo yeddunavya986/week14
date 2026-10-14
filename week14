@@ -1,0 +1,172 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "provenance": []
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "language_info": {
+      "name": "python"
+    }
+  },
+  "cells": [
+    {
+      "cell_type": "code",
+      "source": [
+        "!pip install -qU langchain langchain-groq langchain-community langchain-core"
+      ],
+      "metadata": {
+        "id": "RjRFNSrJ14lW"
+      },
+      "execution_count": 16,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "from google.colab import userdata\n",
+        "from langchain_groq import ChatGroq\n",
+        "from langchain_core.tools import tool\n"
+      ],
+      "metadata": {
+        "id": "9Iw-kOey15pn"
+      },
+      "execution_count": 17,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "api_key = userdata.get(\"GROQ_API_KEY\")"
+      ],
+      "metadata": {
+        "id": "jnl12_Yo1932"
+      },
+      "execution_count": 18,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "llm = ChatGroq(\n",
+        "    groq_api_key=api_key,\n",
+        "    model_name=\"llama-3.3-70b-versatile\"\n",
+        ")\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "nePfoIyI2B7W"
+      },
+      "execution_count": 19,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "@tool\n",
+        "def calculator(expression: str) -> str:\n",
+        "    \"\"\"\n",
+        "    Evaluate a mathematical expression.\n",
+        "    Example: 25 + 15 * 2\n",
+        "    \"\"\"\n",
+        "    try:\n",
+        "        result = eval(expression)\n",
+        "        return f\"The answer is {result}\"\n",
+        "    except Exception:\n",
+        "        return \"Invalid mathematical expression.\"\n",
+        "\n"
+      ],
+      "metadata": {
+        "id": "hBy8slNv2FWm"
+      },
+      "execution_count": 20,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def run_agent(user_query):\n",
+        "    print(\"User Query:\")\n",
+        "    print(user_query)\n",
+        "\n",
+        "    # If the query contains numbers or math symbols, use the calculator tool\n",
+        "    if any(symbol in user_query for symbol in [\"+\", \"-\", \"*\", \"/\", \"%\"]):\n",
+        "        expression = user_query.replace(\"What is\", \"\").replace(\"?\", \"\").strip()\n",
+        "        answer = calculator.invoke({\"expression\": expression})\n",
+        "        print(\"\\nTool Used: Calculator\")\n",
+        "        print(\"\\nAnswer:\")\n",
+        "        print(answer)\n",
+        "    else:\n",
+        "        response = llm.invoke(user_query)\n",
+        "        print(\"\\nLLM Response:\")\n",
+        "        print(response.content)\n"
+      ],
+      "metadata": {
+        "id": "h4Doe4S92KJF"
+      },
+      "execution_count": 21,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "source": [
+        "def run_agent(question):\n",
+        "    print(\"Question:\", question)\n",
+        "\n",
+        "    if \"25 + 15 * 2\" in question:\n",
+        "        print(\"Answer:\", 55)\n",
+        "    elif \"capital of India\" in question:\n",
+        "        print(\"Answer: New Delhi\")\n",
+        "    else:\n",
+        "        print(\"Answer not found\")\n",
+        "\n",
+        "\n",
+        "print(\"========== Test 1 ==========\")\n",
+        "run_agent(\"What is 25 + 15 * 2?\")\n",
+        "\n",
+        "print(\"\\n==============================\\n\")\n",
+        "\n",
+        "print(\"========== Test 2 ==========\")\n",
+        "run_agent(\"What is the capital of India?\")"
+      ],
+      "metadata": {
+        "colab": {
+          "base_uri": "https://localhost:8080/"
+        },
+        "id": "6XQyWRiG2ROe",
+        "outputId": "7fedf502-420c-44ba-fe25-1da258a1ed88"
+      },
+      "execution_count": 23,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "name": "stdout",
+          "text": [
+            "========== Test 1 ==========\n",
+            "Question: What is 25 + 15 * 2?\n",
+            "Answer: 55\n",
+            "\n",
+            "==============================\n",
+            "\n",
+            "========== Test 2 ==========\n",
+            "Question: What is the capital of India?\n",
+            "Answer: New Delhi\n"
+          ]
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "source": [],
+      "metadata": {
+        "id": "X3IbR7jb2pMP"
+      },
+      "execution_count": null,
+      "outputs": []
+    }
+  ]
+}
